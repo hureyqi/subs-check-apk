@@ -8,8 +8,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
@@ -129,10 +131,7 @@ class MediaChecker(
                     .url("https://disney.api.edge.bamgrid.com/devices")
                     .header("Authorization", "ZGlzbmV5JmJyb3dzZXImMS4wLjA.Cu56AgSfBTDag5NiRA81oLHkDZfu5L3CKadnefEAY84")
                     .header("Content-Type", "application/json")
-                    .post(okhttp3.RequestBody.create(
-                        okhttp3.MediaType.parse("application/json"),
-                        """{"applicationRuntime":"chrome","deviceFamily":"browser","deviceProfile":"windows"}"""
-                    )).build()
+                    .post("""{"applicationRuntime":"chrome","deviceFamily":"browser","deviceProfile":"windows"}""".toRequestBody("application/json".toMediaType())).build()
             ).execute()
             disney = resp.isSuccessful
             resp.close()

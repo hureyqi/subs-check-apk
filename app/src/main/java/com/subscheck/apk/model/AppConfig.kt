@@ -1,6 +1,7 @@
 package com.subscheck.apk.model
 
 import android.content.Context
+import com.subscheck.apk.pipeline.PipelineConfig
 
 /**
  * App configuration managed via SharedPreferences.

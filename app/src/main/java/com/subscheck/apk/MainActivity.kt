@@ -101,8 +101,8 @@ class MainActivity : AppCompatActivity() {
                         binding.textProgress.text = "总计: ${progress.total}, 已处理: ${progress.processed}"
                         if (progress.total > 0) {
                             binding.progressBar.visibility = View.VISIBLE
-                            binding.progressBar.max = progress.total
-                            binding.progressBar.progress = progress.processed
+                            binding.progressBar.max = progress.total.toFloat()
+                            binding.progressBar.progress = progress.processed.toFloat()
                         }
                     }
                     is PipelineProgress.ResultsReady -> {
