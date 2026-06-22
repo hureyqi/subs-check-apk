@@ -5,6 +5,8 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import okhttp3.OkHttpClient
+import java.net.InetSocketAddress
+import java.net.Proxy as JavaNetProxy
 import java.util.concurrent.TimeUnit
 
 /**
@@ -15,16 +17,26 @@ class SubsCheckApp : Application() {
 
     companion object {
         const val TAG = "SubsCheckApp"
+        var proxyConfig: ProxyConfig? = null
     }
 
+    data class ProxyConfig(val host: String, val port: Int)
+
     val okHttpClient by lazy {
-        OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .followRedirects(true)
             .followSslRedirects(true)
-            .build()
+
+        val config = proxyConfig
+        if (config != null) {
+            val javaProxy = JavaNetProxy(JavaNetProxy.Type.SOCKS, InetSocketAddress(config.host, config.port))
+            builder.proxy(javaProxy)
+        }
+
+        builder.build()
     }
 
     // Log events flow

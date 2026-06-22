@@ -64,20 +64,28 @@ object SubscriptionParser {
         val proxies = mutableListOf<Proxy>()
         try {
             val yaml = Yaml()
-            val data = yaml.load(content) as Map<String, Any>
-            val proxyList = data["proxies"] as? List<Map<String, Any>> ?: return emptyList()
+            val data = yaml.load(content) as? Map<String, Any>
+            if (data == null) {
+                Log.w(TAG, "YAML root is not a Map")
+                return emptyList()
+            }
+
+            val proxyList = data["proxies"] as? List<*>
+            if (proxyList == null) {
+                Log.w(TAG, "No 'proxies' key found in YAML")
+                return emptyList()
+            }
+
+            Log.i(TAG, "YAML proxies list size: ${proxyList.size}")
 
             for (item in proxyList) {
                 try {
-                    val type = (item["type"] as? String)?.lowercase() ?: continue
-                    val name = item["name"] as? String ?: type
-                    val server = item["server"] as? String ?: continue
-                    val port = when (val p = item["port"]) {
-                        is Int -> p
-                        is Double -> p.toInt()
-                        else -> continue
-                    }
-                    proxies.add(Proxy(type, name, server, port, item))
+                    val map = item as? Map<String, Any> ?: continue
+                    val type = (map["type"] as? String)?.lowercase() ?: continue
+                    val name = map["name"] as? String ?: type
+                    val server = map["server"] as? String ?: continue
+                    val port = parsePort(map["port"]) ?: continue
+                    proxies.add(Proxy(type, name, server, port, map))
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to parse proxy item: ${e.message}")
                 }
@@ -85,7 +93,19 @@ object SubscriptionParser {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse YAML: ${e.message}")
         }
+        Log.i(TAG, "Parsed ${proxies.size} proxies from YAML")
         return proxies
+    }
+
+    private fun parsePort(value: Any?): Int? {
+        return when (value) {
+            is Int -> value
+            is Long -> value.toInt()
+            is Double -> value.toInt()
+            is Number -> value.toInt()
+            is String -> value.toIntOrNull()
+            else -> null
+        }
     }
 
     /**
