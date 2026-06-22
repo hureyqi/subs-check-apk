@@ -16,38 +16,47 @@ object SubscriptionParser {
 
     /**
      * Parse subscription content into proxy list.
-     * Auto-detects format: YAML or base64-encoded URIs.
+     * Returns a pair of (proxies, debugMessage).
      */
-    fun parse(content: String): List<Proxy> {
-        val trimmed = content.trim()
+    data class ParseResult(val proxies: List<Proxy>, val debugInfo: String)
 
-        // Try to detect if it's base64 encoded
-        if (!trimmed.startsWith("proxies:") && !trimmed.startsWith("proxy-groups:") &&
-            !trimmed.contains("type:") && looksLikeBase64(trimmed)) {
-            try {
-                val decoded = String(Base64.decode(trimmed, Base64.DEFAULT))
-                if (decoded.contains("://")) {
-                    return parseUriSubscription(decoded)
-                }
-                // Try YAML after base64 decode
-                return parseYamlSubscription(decoded)
-            } catch (e: Exception) {
-                Log.w(TAG, "Base64 decode failed, trying as plain text")
-            }
+    fun parse(content: String): ParseResult {
+        val trimmed = content.trim()
+        val debug = StringBuilder()
+        debug.append("内容长度: ${trimmed.length}, 开头: ${trimmed.take(60).replace('\n', ' ')}\n")
+
+        // Try YAML format FIRST (most common for GitHub subscriptions)
+        if (trimmed.contains("proxies:") || trimmed.contains("type:")) {
+            debug.append("→ 检测到 YAML 格式\n")
+            val proxies = parseYamlSubscription(trimmed, debug)
+            return ParseResult(proxies, debug.toString())
         }
 
-        // Try YAML format
-        if (trimmed.contains("type:") || trimmed.contains("proxies:")) {
-            return parseYamlSubscription(trimmed)
+        // Try to detect if it's base64 encoded
+        if (looksLikeBase64(trimmed)) {
+            debug.append("→ 尝试 Base64 解码\n")
+            try {
+                val decoded = String(Base64.decode(trimmed, Base64.DEFAULT))
+                debug.append("  解码后长度: ${decoded.length}\n")
+                if (decoded.contains("://")) {
+                    debug.append("  → URI 格式\n")
+                    return ParseResult(parseUriSubscription(decoded), debug.toString())
+                }
+                debug.append("  → YAML 格式\n")
+                return ParseResult(parseYamlSubscription(decoded, debug), debug.toString())
+            } catch (e: Exception) {
+                debug.append("  Base64 解码失败: ${e.message}\n")
+            }
         }
 
         // Try URI format
         if (trimmed.contains("://")) {
-            return parseUriSubscription(trimmed)
+            debug.append("→ 检测到 URI 格式\n")
+            return ParseResult(parseUriSubscription(trimmed), debug.toString())
         }
 
-        Log.w(TAG, "Unknown subscription format")
-        return emptyList()
+        debug.append("→ 未知格式，无法解析\n")
+        return ParseResult(emptyList(), debug.toString())
     }
 
     private fun looksLikeBase64(content: String): Boolean {
@@ -56,44 +65,69 @@ object SubscriptionParser {
             it == '+' || it == '/' || it == '=' }
     }
 
-    /**
-     * Parse YAML format subscription (Clash format).
-     */
     @Suppress("UNCHECKED_CAST")
-    private fun parseYamlSubscription(content: String): List<Proxy> {
+    private fun parseYamlSubscription(content: String, debug: StringBuilder): List<Proxy> {
         val proxies = mutableListOf<Proxy>()
         try {
             val yaml = Yaml()
-            val data = yaml.load(content) as? Map<String, Any>
-            if (data == null) {
-                Log.w(TAG, "YAML root is not a Map")
+            val data = yaml.load(content)
+            debug.append("  YAML 根类型: ${data?.javaClass?.simpleName}\n")
+
+            if (data !is Map<*, *>) {
+                debug.append("   根节点不是 Map\n")
                 return emptyList()
             }
 
-            val proxyList = data["proxies"] as? List<*>
-            if (proxyList == null) {
-                Log.w(TAG, "No 'proxies' key found in YAML")
+            val proxyList = data["proxies"]
+            debug.append("  proxies 类型: ${proxyList?.javaClass?.simpleName}, 数量: ${(proxyList as? List<*>)?.size}\n")
+
+            if (proxyList !is List<*>) {
+                debug.append("  ✗ 没有找到 proxies 列表\n")
                 return emptyList()
             }
 
-            Log.i(TAG, "YAML proxies list size: ${proxyList.size}")
+            var parsedCount = 0
+            var skippedType = 0
+            var skippedServer = 0
+            var skippedPort = 0
+            var skippedItem = 0
 
-            for (item in proxyList) {
+            for ((idx, item) in proxyList.withIndex()) {
                 try {
-                    val map = item as? Map<String, Any> ?: continue
-                    val type = (map["type"] as? String)?.lowercase() ?: continue
-                    val name = map["name"] as? String ?: type
-                    val server = map["server"] as? String ?: continue
-                    val port = parsePort(map["port"]) ?: continue
-                    proxies.add(Proxy(type, name, server, port, map))
+                    if (item !is Map<*, *>) {
+                        skippedItem++
+                        continue
+                    }
+                    val type = (item["type"] as? String)?.lowercase()
+                    if (type == null) {
+                        skippedType++
+                        continue
+                    }
+                    val server = item["server"] as? String
+                    if (server == null) {
+                        skippedServer++
+                        continue
+                    }
+                    val port = parsePort(item["port"])
+                    if (port == null) {
+                        skippedPort++
+                        continue
+                    }
+
+                    val name = item["name"] as? String ?: type
+                    val rawData = item as Map<String, Any>
+                    proxies.add(Proxy(type, name, server, port, rawData))
+                    parsedCount++
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to parse proxy item: ${e.message}")
+                    // skip
                 }
             }
+
+            debug.append("  解析结果: 总数=${proxyList.size}, 成功=$parsedCount, " +
+                "无type=$skippedType, 无server=$skippedServer, 端口无效=$skippedPort, 非Map=$skippedItem\n")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse YAML: ${e.message}")
+            debug.append("   YAML 解析异常: ${e.message}\n")
         }
-        Log.i(TAG, "Parsed ${proxies.size} proxies from YAML")
         return proxies
     }
 

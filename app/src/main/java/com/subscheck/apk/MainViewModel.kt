@@ -180,13 +180,18 @@ class MainViewModel : ViewModel() {
                         continue
                     }
 
-                    Log.i(TAG, "Fetched ${body.length} chars from $mirrorLabel")
-                    val proxies = withContext(Dispatchers.Default) {
+                    val bodyPreview = if (body.length > 200) body.substring(0, 200) + "..." else body
+                    Log.i(TAG, "Fetched ${body.length} chars from $mirrorLabel: $bodyPreview")
+
+                    val parseResult = withContext(Dispatchers.Default) {
                         SubscriptionParser.parse(body)
                     }
-                    if (proxies.isNotEmpty()) {
-                        emitLog("  ✓ [$mirrorLabel] 成功: ${proxies.size} 个节点")
-                        allProxies.addAll(proxies)
+                    Log.i(TAG, "Parse result: ${parseResult.proxies.size} proxies")
+                    emitLog("  解析: ${parseResult.debugInfo.trim()}")
+
+                    if (parseResult.proxies.isNotEmpty()) {
+                        emitLog("  ✓ [$mirrorLabel] 成功: ${parseResult.proxies.size} 个节点")
+                        allProxies.addAll(parseResult.proxies)
                         successCount++
                         success = true
                     } else {
