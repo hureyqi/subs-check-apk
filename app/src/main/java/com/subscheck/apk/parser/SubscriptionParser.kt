@@ -70,7 +70,8 @@ object SubscriptionParser {
         val proxies = mutableListOf<Proxy>()
         try {
             val yaml = Yaml()
-            val data = yaml.load(content)
+            @Suppress("UNCHECKED_CAST")
+            val data = yaml.load(content) as Any?
             debug.append("  YAML 根类型: ${data?.javaClass?.simpleName}\n")
 
             if (data !is Map<*, *>) {
