@@ -19,6 +19,27 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Fix settings.gradle.kts for CI
+        run: |
+          cat > settings.gradle.kts << 'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "subs-check-apk"
+          include(":app")
+          EOF
+
       - name: Remove proxy settings from gradle.properties
         run: |
           sed -i '/^systemProp\.http/d' gradle.properties
