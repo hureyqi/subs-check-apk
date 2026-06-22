@@ -106,7 +106,7 @@ data class AppConfig(
         fun load(context: Context): AppConfig {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return AppConfig(
-                subscriptionUrls = prefs.getString(KEY_URLS, "")?.split("\n")?.filter { it.isNotBlank() } ?: DEFAULT_URLS,
+                subscriptionUrls = prefs.getString(KEY_URLS, null)?.split("\n")?.filter { it.isNotBlank() } ?: DEFAULT_URLS,
                 concurrent = prefs.getInt(KEY_CONCURRENT, 50),
                 speedConcurrent = prefs.getInt(KEY_SPEED_CONCURRENT, 20),
                 mediaConcurrent = prefs.getInt(KEY_MEDIA_CONCURRENT, 20),
