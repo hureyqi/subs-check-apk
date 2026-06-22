@@ -103,10 +103,8 @@ if "$cygwin" || "$msys" ; then
         then
             arg=$( cygpath --path --ignore --mixed "$arg" )
         fi
-        # Roll the args list around exactly as many times as the number of
-        # temporary variables assigned, so each argument word is associated with a temporary variable.
-        shift                   # remove old arg
-        set -- "$@" "$arg"      # push replacement arg
+        shift
+        set -- "$@" "$arg"
     done
 fi
 
