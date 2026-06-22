@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subs Check APK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone-frame">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-left">
+        <span class="time">20:05</span>
+      </div>
+      <div class="status-right">
+        <span class="material-symbols-outlined signal-icon">signal_cellular_alt</span>
+        <span class="material-symbols-outlined wifi-icon">wifi</span>
+        <span class="battery">100%</span>
+        <span class="material-symbols-outlined battery-icon">battery_full</span>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="app-content">
+      <!-- App Bar -->
+      <header class="app-bar">
+        <h1 class="app-title">Subs Check</h1>
+        <button class="icon-btn">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+      </header>
+
+      <!-- Scrollable Content -->
+      <div class="scroll-content">
+        <!-- URL Input Card -->
+        <div class="card url-card">
+          <div class="url-input-wrapper">
+            <label class="input-label">请输入订阅 URL</label>
+            <div class="url-input">
+              <span class="material-symbols-outlined input-icon">link</span>
+              <div class="url-text">https://raw.githubusercontent.com/user/repo/main/list1.txt&#10;https://raw.githubusercontent.com/user/repo/main/list2.yml&#10;https://raw.githubusercontent.com/user/repo/main/list3.yaml&#10;https://raw.githubusercontent.com/user/repo/main/list4.json&#10;...</div>
+            </div>
+          </div>
+          <div class="url-actions">
+            <button class="btn-primary">
+              <span class="material-symbols-outlined btn-icon">play_arrow</span>
+              开始检测
+            </button>
+            <button class="icon-btn">
+              <span class="material-symbols-outlined">tune</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+          <div class="progress-info">
+            <div class="progress-phase">
+              <span class="material-symbols-outlined phase-icon pulse">speed</span>
+              <span class="phase-text">阶段: 测活</span>
+            </div>
+            <div class="progress-stats">
+              总计: 500, 已处理: <strong>175</strong>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 35%;"></div>
+            <div class="progress-bar-shimmer"></div>
+          </div>
+          <button class="btn-outlined cancel-btn">
+            <span class="material-symbols-outlined btn-icon">stop_circle</span>
+            取消
+          </button>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="card stats-card">
+          <div class="stats-header">
+            <span class="material-symbols-outlined stats-icon">analytics</span>
+            <h2 class="stats-title">检测结果</h2>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">500</div>
+              <div class="stat-label">总计</div>
+            </div>
+            <div class="stat-item alive">
+              <div class="stat-value">175</div>
+              <div class="stat-label">存活</div>
+            </div>
+            <div class="stat-item final">
+              <div class="stat-value">89</div>
+              <div class="stat-label">最终</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Log Section -->
+        <div class="card log-card">
+          <div class="log-header">
+            <span class="material-symbols-outlined log-icon">terminal</span>
+            <h2 class="log-title">运行日志</h2>
+          </div>
+          <div class="log-content">
+            <div class="log-entry fade-in"><span class="log-time">[20:05:12]</span> <span class="log-text">开始获取订阅链接...</span></div>
+            <div class="log-entry fade-in delay-1"><span class="log-time">[20:05:13]</span> <span class="log-text">获取订阅 [1/21]: https://raw.github...</span></div>
+            <div class="log-entry fade-in delay-2"><span class="log-time">[20:05:15]</span> <span class="log-text">订阅 1 解析到 45 个节点</span></div>
+            <div class="log-entry fade-in delay-3"><span class="log-time">[20:05:16]</span> <span class="log-text">获取订阅 [2/21]: https://raw.github...</span></div>
+            <div class="log-entry fade-in delay-4"><span class="log-time">[20:05:20]</span> <span class="log-text">共解析到 500 个节点</span></div>
+            <div class="log-entry fade-in delay-5"><span class="log-time">[20:05:21]</span> <span class="log-text">开始检测流程...</span></div>
+            <div class="log-entry fade-in delay-6"><span class="log-time">[20:05:22]</span> <span class="log-text">开始检测，共 500 个节点</span></div>
+            <div class="log-entry fade-in delay-7"><span class="log-time">[20:05:25]</span> <span class="log-text success">阶段 [去重] 500/0</span></div>
+            <div class="log-entry active fade-in delay-8"><span class="log-time">[20:05:30]</span> <span class="log-text info">阶段 [测活] 500/175</span><span class="cursor-blink">▊</span></div>
+          </div>
+        </div>
+
+        <!-- Spacer for bottom button -->
+        <div class="bottom-spacer"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Save Button -->
+    <div class="bottom-bar">
+      <button class="btn-save">
+        <span class="material-symbols-outlined btn-icon">save_alt</span>
+        保存到 Download 文件夹
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

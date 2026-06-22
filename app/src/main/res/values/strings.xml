@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Subs Check</string>
+
+    <!-- Main Activity -->
+    <string name="check_subscriptions">检查订阅</string>
+    <string name="loading">加载中…</string>
+    <string name="error_occurred">发生错误</string>
+    <string name="retry">重试</string>
+    <string name="settings">设置</string>
+    <string name="about">关于</string>
+
+    <!-- Network -->
+    <string name="enter_url">请输入订阅 URL</string>
+    <string name="url_hint">https://example.com/subscription.yaml</string>
+    <string name="parse_yaml">解析 YAML</string>
+    <string name="fetching_data">正在获取数据…</string>
+    <string name="parsing_data">正在解析数据…</string>
+    <string name="network_error">网络错误，请检查连接</string>
+    <string name="parse_error">解析失败，请检查 YAML 格式</string>
+
+    <!-- Results -->
+    <string name="no_data">暂无数据</string>
+    <string name="subscription_count">订阅数量: %d</string>
+    <string name="valid_count">有效: %d</string>
+    <string name="invalid_count">无效: %d</string>
+
+    <!-- Actions -->
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="export">导出</string>
+    <string name="import_data">导入</string>
+    <string name="refresh">刷新</string>
+
+    <!-- Permissions -->
+    <string name="permission_required">需要存储权限</string>
+    <string name="permission_denied">权限被拒绝</string>
+</resources>
