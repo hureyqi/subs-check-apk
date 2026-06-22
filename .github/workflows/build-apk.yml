@@ -19,6 +19,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Remove proxy settings from gradle.properties
+        run: |
+          sed -i '/^systemProp\.http/d' gradle.properties
+          sed -i '/^systemProp\.https/d' gradle.properties
+          sed -i '/^systemProp\.http\.nonProxy/d' gradle.properties
+          sed -i '/^systemProp\.http\.auth/d' gradle.properties
+
       - name: Grant execute permission
         run: chmod +x ./gradlew
 
