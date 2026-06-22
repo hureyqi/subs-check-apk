@@ -19,6 +19,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Install Android SDK
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -sL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o /tmp/cmdline-tools.zip
+          unzip -q /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Remove proxy settings from gradle.properties
+        run: |
+          sed -i '/^systemProp\.http/d' gradle.properties
+          sed -i '/^systemProp\.https/d' gradle.properties
+          sed -i '/^systemProp\.http\.nonProxy/d' gradle.properties
+          sed -i '/^systemProp\.http\.auth/d' gradle.properties
+
       - name: Fix settings.gradle.kts for CI
         run: |
           cat > settings.gradle.kts << 'EOF'
@@ -39,13 +55,6 @@ jobs:
           rootProject.name = "subs-check-apk"
           include(":app")
           EOF
-
-      - name: Remove proxy settings from gradle.properties
-        run: |
-          sed -i '/^systemProp\.http/d' gradle.properties
-          sed -i '/^systemProp\.https/d' gradle.properties
-          sed -i '/^systemProp\.http\.nonProxy/d' gradle.properties
-          sed -i '/^systemProp\.http\.auth/d' gradle.properties
 
       - name: Grant execute permission
         run: chmod +x ./gradlew
