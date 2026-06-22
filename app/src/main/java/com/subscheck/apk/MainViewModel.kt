@@ -138,46 +138,44 @@ class MainViewModel : ViewModel() {
         var failCount = 0
 
         for ((index, url) in urls.withIndex()) {
-            try {
-                val shortUrl = if (url.length > 80) url.substring(0, 77) + "..." else url
-                emitLog("[${index + 1}/${urls.size}] 获取: $shortUrl")
+            val shortUrl = if (url.length > 80) url.substring(0, 77) + "..." else url
+            emitLog("[${index + 1}/${urls.size}] 获取: $shortUrl")
+            var success = false
 
-                val request = Request.Builder()
-                    .url(url)
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                    .header("Accept", "*/*")
-                    .get()
-                    .build()
+            for (retry in 0..1) {
+                if (success) break
+                if (retry > 0) emitLog("  重试 ($retry/1)...")
 
-                val response = client.newCall(request).execute()
-                if (!response.isSuccessful) {
-                    emitLog("[${index + 1}/${urls.size}] 失败: HTTP ${response.code}")
-                    failCount++
-                    continue
-                }
+                try {
+                    val request = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                        .header("Accept", "*/*")
+                        .build()
 
-                val body = response.body?.string()
-                if (body.isNullOrEmpty()) {
-                    emitLog("[${index + 1}/${urls.size}] 失败: 内容为空")
-                    failCount++
-                    continue
-                }
+                    val response = client.newCall(request).execute()
+                    if (!response.isSuccessful) continue
 
-                val proxies = withContext(Dispatchers.Default) {
-                    SubscriptionParser.parse(body)
+                    val body = response.body?.string()
+                    if (body.isNullOrEmpty()) continue
+
+                    val proxies = withContext(Dispatchers.Default) {
+                        SubscriptionParser.parse(body)
+                    }
+                    if (proxies.isNotEmpty()) {
+                        emitLog("  成功: ${proxies.size} 个节点")
+                        allProxies.addAll(proxies)
+                        successCount++
+                        success = true
+                    }
+                } catch (e: Exception) {
+                    // retry or fail
                 }
-                if (proxies.isNotEmpty()) {
-                    emitLog("[${index + 1}/${urls.size}] 成功: ${proxies.size} 个节点")
-                    allProxies.addAll(proxies)
-                    successCount++
-                } else {
-                    emitLog("[${index + 1}/${urls.size}] 解析: 0个节点(格式不支持)")
-                    failCount++
-                }
-            } catch (e: Exception) {
-                emitLog("[${index + 1}/${urls.size}] 错误: ${e.message?.take(50)}")
+            }
+
+            if (!success) {
+                emitLog("  失败: 无法获取")
                 failCount++
-                Log.w("MainViewModel", "Fetch failed", e)
             }
         }
 
