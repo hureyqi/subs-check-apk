@@ -28,37 +28,6 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Remove proxy settings from gradle.properties
-        run: |
-          sed -i '/^systemProp\.http/d' gradle.properties
-          sed -i '/^systemProp\.https/d' gradle.properties
-          sed -i '/^systemProp\.http\.nonProxy/d' gradle.properties
-          sed -i '/^systemProp\.http\.auth/d' gradle.properties
-
-      - name: Fix gradle-wrapper URL for CI
-        run: sed -i 's|mirrors.cloud.tencent.com/gradle|services.gradle.org/distributions|g' gradle/wrapper/gradle-wrapper.properties
-
-      - name: Fix settings.gradle.kts for CI
-        run: |
-          cat > settings.gradle.kts << 'EOF'
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "subs-check-apk"
-          include(":app")
-          EOF
-
       - name: Grant execute permission
         run: chmod +x ./gradlew
 
