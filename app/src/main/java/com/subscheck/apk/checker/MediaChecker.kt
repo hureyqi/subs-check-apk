@@ -2,7 +2,6 @@ package com.subscheck.apk.checker
 
 import android.util.Log
 import com.subscheck.apk.model.CheckResult
-import com.subscheck.apk.model.Proxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -13,7 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.InetSocketAddress
-import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
 /**
@@ -43,12 +41,12 @@ class MediaChecker(
     }
 
     private suspend fun checkSingleMedia(result: CheckResult): CheckResult {
-        val proxy = Proxy(
-            Proxy.Type.SOCKS,
+        val netProxy = java.net.Proxy(
+            java.net.Proxy.Type.SOCKS,
             InetSocketAddress(result.proxy.server, result.proxy.port)
         )
         val proxyClient = client.newBuilder()
-            .proxy(proxy)
+            .proxy(netProxy)
             .connectTimeout(timeoutMs, TimeUnit.MILLISECONDS)
             .readTimeout(timeoutMs, TimeUnit.MILLISECONDS)
             .build()

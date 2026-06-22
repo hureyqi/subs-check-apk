@@ -360,7 +360,9 @@ object SubscriptionParser {
                 "TUIC-$server"
             }
 
-            val (uuid, password) = userInfo.split(":", limit = 2).let { it[0] to it.getOrNull(1) ?: "" }
+            val userInfoParts = userInfo.split(":", limit = 2)
+            val uuid = userInfoParts[0]
+            val password = userInfoParts.getOrElse(1) { "" }
 
             return Proxy(
                 type = "tuic",
