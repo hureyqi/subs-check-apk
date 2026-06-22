@@ -35,6 +35,9 @@ jobs:
           sed -i '/^systemProp\.http\.nonProxy/d' gradle.properties
           sed -i '/^systemProp\.http\.auth/d' gradle.properties
 
+      - name: Fix gradle-wrapper URL for CI
+        run: sed -i 's|mirrors.cloud.tencent.com/gradle|services.gradle.org/distributions|g' gradle/wrapper/gradle-wrapper.properties
+
       - name: Fix settings.gradle.kts for CI
         run: |
           cat > settings.gradle.kts << 'EOF'
