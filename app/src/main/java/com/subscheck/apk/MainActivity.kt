@@ -50,8 +50,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.buttonDefault.setOnClickListener {
+            val defaultUrls = AppConfig.DEFAULT_URLS.joinToString("\n")
+            binding.editTextUrl.setText(defaultUrls)
             config = config.copy(subscriptionUrls = AppConfig.DEFAULT_URLS)
-            binding.editTextUrl.setText(AppConfig.DEFAULT_URLS.joinToString("\n"))
+            showProgress(true)
+            resetUI()
+            viewModel.runCheck(this, AppConfig.DEFAULT_URLS, config)
         }
 
         binding.buttonCancel.setOnClickListener {

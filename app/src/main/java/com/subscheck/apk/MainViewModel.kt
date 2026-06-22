@@ -141,7 +141,8 @@ class MainViewModel : ViewModel() {
 
                 val request = Request.Builder()
                     .url(url)
-                    .header("User-Agent", "clash.meta (https://github.com/beck-8/subs-check)")
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept", "*/*")
                     .get()
                     .build()
 
