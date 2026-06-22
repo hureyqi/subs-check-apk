@@ -19,37 +19,29 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK components
-        run: |
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        with:
+          cmdline-tools-version: 11076708
+          packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: subs-check-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: subs-check-release-apk
           path: app/build/outputs/apk/release/app-release.apk
-
-      - name: Display APK info
-        run: |
-          echo "Debug APK size: $(du -h app/build/outputs/apk/debug/app-debug.apk | cut -f1)"
-          echo "Release APK size: $(du -h app/build/outputs/apk/release/app-release.apk | cut -f1)"
+          retention-days: 30
