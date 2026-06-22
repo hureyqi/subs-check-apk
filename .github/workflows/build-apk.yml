@@ -20,17 +20,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 11076708
-          packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
+      - name: Download Android SDK Command Line Tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -L -o /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          rm /tmp/cmdline-tools.zip
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Accept SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
+      - name: Install Android SDK packages
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
+      - name: Build with Gradle
+        run: chmod +x ./gradlew && ./gradlew assembleDebug assembleRelease
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
