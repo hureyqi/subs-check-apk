@@ -49,6 +49,11 @@ class MainActivity : AppCompatActivity() {
             showSettingsDialog()
         }
 
+        binding.buttonDefault.setOnClickListener {
+            config = config.copy(subscriptionUrls = AppConfig.DEFAULT_URLS)
+            binding.editTextUrl.setText(AppConfig.DEFAULT_URLS.joinToString("\n"))
+        }
+
         binding.buttonCancel.setOnClickListener {
             viewModel.cancelCheck()
         }

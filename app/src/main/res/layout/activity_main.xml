@@ -83,6 +83,15 @@
                         app:cornerRadius="8dp" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDefault"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:text="默认订阅"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonSettings"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
