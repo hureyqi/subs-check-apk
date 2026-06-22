@@ -26,6 +26,10 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class MainViewModel : ViewModel() {
 
+    companion object {
+        private const val TAG = "MainViewModel"
+    }
+
     private val _progressFlow = MutableSharedFlow<PipelineProgress>(extraBufferCapacity = 1)
     val progressFlow: SharedFlow<PipelineProgress> = _progressFlow.asSharedFlow()
 
