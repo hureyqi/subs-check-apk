@@ -134,41 +134,54 @@ class MainViewModel : ViewModel() {
         val allProxies = mutableListOf<Proxy>()
         val app = context.applicationContext as SubsCheckApp
         val client = app.okHttpClient
+        var successCount = 0
+        var failCount = 0
 
         for ((index, url) in urls.withIndex()) {
             try {
-                emitLog("获取订阅 [${index + 1}/${urls.size}]: $url")
+                val shortUrl = if (url.length > 80) url.substring(0, 77) + "..." else url
+                emitLog("[${index + 1}/${urls.size}] 获取: $shortUrl")
 
                 val request = Request.Builder()
                     .url(url)
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                     .header("Accept", "*/*")
                     .get()
                     .build()
 
                 val response = client.newCall(request).execute()
                 if (!response.isSuccessful) {
-                    emitLog("警告: 订阅 ${index + 1} 返回 ${response.code}")
+                    emitLog("[${index + 1}/${urls.size}] 失败: HTTP ${response.code}")
+                    failCount++
                     continue
                 }
 
                 val body = response.body?.string()
                 if (body.isNullOrEmpty()) {
-                    emitLog("警告: 订阅 ${index + 1} 内容为空")
+                    emitLog("[${index + 1}/${urls.size}] 失败: 内容为空")
+                    failCount++
                     continue
                 }
 
                 val proxies = withContext(Dispatchers.Default) {
                     SubscriptionParser.parse(body)
                 }
-                emitLog("订阅 ${index + 1} 解析到 ${proxies.size} 个节点")
-                allProxies.addAll(proxies)
+                if (proxies.isNotEmpty()) {
+                    emitLog("[${index + 1}/${urls.size}] 成功: ${proxies.size} 个节点")
+                    allProxies.addAll(proxies)
+                    successCount++
+                } else {
+                    emitLog("[${index + 1}/${urls.size}] 解析: 0个节点(格式不支持)")
+                    failCount++
+                }
             } catch (e: Exception) {
-                emitLog("获取订阅 ${index + 1} 失败: ${e.message}")
-                Log.w("MainViewModel", "Fetch subscription failed", e)
+                emitLog("[${index + 1}/${urls.size}] 错误: ${e.message?.take(50)}")
+                failCount++
+                Log.w("MainViewModel", "Fetch failed", e)
             }
         }
 
+        emitLog("订阅源统计: 成功 $successCount, 失败 $failCount, 总节点 ${allProxies.size}")
         return allProxies
     }
 
